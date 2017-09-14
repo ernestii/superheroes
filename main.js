@@ -36,58 +36,53 @@ function template(hero) {
   </article>`;
 }
 
-const add = document.getElementById('add');
+const btnAdd = document.getElementById('add');
 const main = document.querySelector('main');
 
 function render() {
   main.innerHTML = heroes.map( (hero, i) => template(hero)).join('');
 }
 
-function* addHero() {
+function* genHero() {
   yield* moreHeroes.map( item => template(item) );
 }
 
-let genHeroes = addHero();
-add.addEventListener('click', function(e) {
-  let next = genHeroes.next();
-
+let hero = genHero();
+btnAdd.addEventListener('click', function(e) {
+  let next = hero.next();
   if ( ! next.done ) {
-    let newHero = document.createElement('div');
-    newHero.innerHTML = next.value;
-    main.appendChild(newHero);
+    main.insertAdjacentHTML('beforeend', next.value);
     audio.add.play();
   } else {
-    audio.error.play();
     console.warn('No more heroes');
+    audio.error.play();
   }
-
   e.preventDefault();
 })
 
-function toggleFollow() {
-  document.body.addEventListener('click', function(e) {
-    if ( e.target && e.target.classList.contains('follow') ) {
-      let action = e.target.innerHTML == '+ Follow' ? 'follow' : 'unfollow';
+// Follow / Unfollow button click handler
+document.body.addEventListener('click', function(e) {
+  if ( e.target && e.target.classList.contains('follow') ) {
+    let action = e.target.innerHTML == '+ Follow' ? 'follow' : 'unfollow';
 
-      switch(action) {
-        case 'follow':
-          e.target.innerText = 'Following';
-          audio.follow.play();
-          console.info('Followed');
-          break;
+    switch(action) {
+      case 'follow':
+        e.target.innerText = 'Following';
+        audio.follow.play();
+        console.info('Followed');
+        break;
 
-        case 'unfollow': 
-          e.target.innerText = '+ Follow';
-          audio.unfollow.play();
-          console.info('Unfollowed')
-          break;
-      }
-
-      e.preventDefault();
+      case 'unfollow': 
+        e.target.innerText = '+ Follow';
+        audio.unfollow.play();
+        console.info('Unfollowed')
+        break;
     }
-  });
-}
 
+    e.preventDefault();
+  }
+});
+
+// Render first 3 heroes
 render();
-toggleFollow();
 
